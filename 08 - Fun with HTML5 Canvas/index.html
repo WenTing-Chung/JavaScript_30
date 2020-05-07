@@ -17,56 +17,43 @@
   <canvas id="draw" width="800" height="800"></canvas>
 
   <script>
-    const canvas = document.querySelector('#draw')
-    const ctx = canvas.getContext('2d')
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-    ctx.strokeStyle = '#BADA55' // 畫筆顏色
-    ctx.lineJoin = 'round' // 當兩條線條交匯時，創建邊角樣式
-    ctx.lineCap = 'round' // 繪製圓形的結束樣式
-    ctx.lineWidth = 100
-    // ctx.globalCompositeOperation = 'multiply'
-
-    let isDrawing = false
-    let lastX = 0
-    let lastY = 0
-    let hue = 0
-    let direction = true
-
-    function draw(e) {
-      if (!isDrawing) return
-      console.log(e)
-      ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`
-      ctx.beginPath() // 開始畫圖
-      // start from
-      ctx.moveTo(lastX, lastY) // 畫圖起始點
-      // go to 
-      ctx.lineTo(e.offsetX, e.offsetY) // 畫線到哪裡
-      ctx.stroke() // 呈現畫面
-      [lastX, lastY] = [e.offsetX, e.offsetY]
-      hue ++
-      if (hue >= 360) {
-        hue = 0
-      }
-
-      if (ctx.lineWidth >= 100 || ctx.lineWidth <= 1) {
-        direction = !direction
-      }
-
-      if (direction) {
-        ctx.lineWidth ++
-      } else {
-        ctx.lineWidth --
-      }
-    }
-    
-    canvas.addEventListener('mousedown', (e) => { // 滑鼠按下
-      isDrawing = true
-      [lastX, lastY] = [e.offsetX, e.offsetY]
+    const canvas = document.querySelector('#draw');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let down = false;
+    let direction = true;
+    let color = 0;
+    let x = 0;
+    let y = 0;
+    ctx.lineWidth = 1;
+    ctx.lineCap = 'round'; // 結束樣式
+    ctx.lineJoin = 'round'; // 轉角樣式
+    ctx.strokeStyle = '#BADA55'; // 畫筆顏色
+    canvas.addEventListener('mousedown', e => { // 滑鼠按下事件
+      down = true;
+      [x, y] = [e.offsetX, e.offsetY]
     })
-    canvas.addEventListener('mousemove', draw)
-    canvas.addEventListener('mouseup', () => isDrawing = false) // 滑鼠放開
-    canvas.addEventListener('mouseout', () => isDrawing = false) // 滑鼠移開範圍
+    canvas.addEventListener('mousemove', e => { // 滑鼠移動事件
+      if (!drawing || !down) return;
+      ctx.beginPath(); // 開始畫圖
+
+      if (ctx.lineWidth >= 50 || ctx.lineWidth <= 1) direction = !direction;
+      if (!direction) ctx.lineWidth--;
+      else ctx.lineWidth++;
+      color = color < 360 ? color + 1 : 0;
+      ctx.strokeStyle = `hsl(${color}, 100%, 90%)`;
+      ctx.moveTo(x, y); // 畫圖起始點
+      ctx.lineTo(e.offsetX, e.offsetY); // 畫線到哪裡
+      [x, y] = [e.offsetX, e.offsetY];
+
+      ctx.stroke(); // 呈現畫面
+    })
+    document.addEventListener('mouseup', () => down = false) // 全局-滑鼠放開事件
+    canvas.addEventListener('mouseleave', () => drawing = false) // 滑鼠移開目標元素
+    canvas.addEventListener('mouseenter', e => { // 滑鼠移入目標元素
+      drawing = true;
+      [x, y] = [e.offsetX, e.offsetY];
+    })
   </script>
 </body>
 </html>
