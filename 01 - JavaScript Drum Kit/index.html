@@ -59,24 +59,23 @@
   <audio data-key="76" src="sounds/tink.wav"></audio>
 
   <script>
-    function playSound(e) {
-      const audio = document.querySelector(`audio[data-key="${e.keyCode}"]`)
-      const key = document.querySelector(`.key[data-key="${e.keyCode}"]`)
-      console.log(key)
-      if (!audio) return // 沒有設定audio 則停止
-      audio.currentTime = 0 // audio 倒回到開始
-      audio.play()
-      key.classList.add("playing")
-    }
-
-    function removeTransition(e) {
-      if (e.propertyName !== "transform") return // 如果不是transform 就跳過
-      this.classList.remove("playing")
-    }
-
-    const keys = document.querySelectorAll(".key")
-    keys.forEach(key => key.addEventListener("transitionend", removeTransition))
-    window.addEventListener("keydown", playSound)
+    (function () { // 立即函式
+      function playHandler (e) {
+        const audio = document.querySelector(`audio[data-key="${e.keyCode}"]`)
+        const dom = document.querySelector(`div[data-key="${e.keyCode}"]`)
+        if (audio) {
+          audio.currentTime = 0; // 時間歸零
+          audio.play();
+        }
+        if (dom) dom.classList.add('playing')
+      }
+      function transitionEndHandler (e) {
+        if (e.propertyName === 'transform') e.currentTarget.classList.remove('playing')
+      }
+      const keys = document.querySelectorAll('.key')
+      keys.forEach(key => key.addEventListener('transitionend', transitionEndHandler))
+      window.addEventListener('keydown', playHandler)
+    })();
   </script>
 </body>
 </html>
